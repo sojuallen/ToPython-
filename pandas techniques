@@ -1,0 +1,73 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Oct  9 10:32:41 2018
+
+@author: Allen
+"""
+
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+sns.set(color_codes = True)
+import pandas as pd
+pd.set_option('display.max_columns', 500)
+%matplotlib inline 
+
+# import the dataset
+iris_dat = pd.read_csv('C://Users/Allen/Documents/Allen Training/Python/data/Iris.csv')
+# preview the data
+dataest = iris_dat
+dataest.head()
+# drop a column - eg. the Id 
+dataest = dataest.drop('Id', axis = 1).head()
+
+# Pandas data manipulation tricks 
+# 1. Boolean Indexing
+dataest.loc[(dataest["Species"] == "Iris-setosa") & (dataest["PetalWidthCm"] == 0.2), ["Species","PetalWidthCm"]]
+# 2. Apply Function 
+def num_missing(x):
+    return sum(x.isnull())
+dataest.apply(num_missing, axis = 0) # axis defines function is applied on each column
+dataest.apply(num_missing, axis = 1) # axis defines funciton is applied on each row
+
+ # 3. Imputing missnig files
+ from scipy.stats import mode 
+mode(dataest['Species']).mode[0]
+dataest['Species'].fillna(mode(dataest['Species']).mode[0], inplace = True)
+print(dataest.apply(num_missing, axis = 0))
+
+#### EDA 
+# summary of the dataset
+
+print(iris_dat.shape)
+print(iris_dat.info())
+print(iris_dat.dtypes)
+print(iris_dat.describe())
+print(iris_dat.groupby("Species").size())
+print(iris_dat.groupby("Species").sum())
+aggregation = {'SepalLengthCm':{'total_Sl':'sum', 'Average_SL':'mean'},'PetalLengthCm':{'lala':'max'},'PetalWidthCm':["count","max"]}
+print(iris_dat.groupby("Species").agg(aggregation))
+
+# visualisations
+iris_dat.iloc[:,1:5].plot(kind = 'box', sharex = False, sharey = False) # bar plot
+
+iris_dat[['SepalLengthCm','Species']].head()
+iris_dat.loc[:,'SepalLengthCm':'Species'].head() # select specific rows and columns 
+iris_dat.iloc[[5,2,3]]
+iris_dat.iloc[:,1:5].head() # select all rows and from 2nd columns to 4th columns
+
+iris_dat.iloc[:,1:5].hist(edgecolor = 'black', linewidth = 1.2) # histograms
+
+# box plot on each feature split out by species
+iris_d = iris_dat.drop('Id', axis = 1)
+iris_d.boxplot(by = "Species",figsize = (10,10))
+
+sns.violinplot(data = iris_d, x = "Species", y = "PetalLengthCm") # violinplot
+
+# scatter plot matrix 
+from pandas.plotting import scatter_matrix
+scatter_matrix(iris_d, figsize = (10,10))
+plt.show()
+
+sns.pairplot(iris_d, hue = 'Species')
+sns.pairplot(iris_d, hue = 'Species', diag_kind = 'kde')
